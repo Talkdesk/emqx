@@ -39,6 +39,14 @@ handle_request(Req) ->
 %% MQTT Over WebSocket
 %%--------------------------------------------------------------------
 
+handle_request('GET', "/ready", Req) ->
+		lager:debug("WebSocket Ready Check from: ~s", [Req:get(peer)]),
+		Req:respond({200, [], <<"I'm ready!">>});
+
+handle_request('GET', "/live", Req) ->
+		lager:debug("WebSocket Live Check from: ~s", [Req:get(peer)]),
+		Req:respond({200, [], <<"I'm alive!">>});
+
 handle_request('GET', "/mqtt", Req) ->
     lager:debug("WebSocket Connection from: ~s", [Req:get(peer)]),
     Upgrade = Req:get_header_value("Upgrade"),
