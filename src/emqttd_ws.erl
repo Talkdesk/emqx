@@ -39,6 +39,9 @@ handle_request(Req) ->
 %% MQTT Over WebSocket
 %%--------------------------------------------------------------------
 
+handle_request('GET', "/metrics", Req) ->
+    lager:debug("Metrics Pull Request from");
+
 handle_request('GET', "/ready", Req) ->
 		lager:debug("WebSocket Ready Check from: ~s", [Req:get(peer)]),
 		Req:respond({200, [], <<"I'm ready!">>});
