@@ -40,7 +40,6 @@ handle_request(Req) ->
 %%--------------------------------------------------------------------
 
 handle_request('GET', "/metrics", Req) ->
-    lager:debug("Metrics Pull Request from"),
     Req:respond({200, [], <<"Metrics!">>});
 
 handle_request('GET', "/ready", Req) ->
