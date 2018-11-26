@@ -21,6 +21,7 @@
 -include("emqttd_protocol.hrl").
 
 -import(proplists, [get_value/3]).
+-import(emqt_statsd, [get_metrics/0]).
 
 -export([handle_request/1, ws_loop/3]).
 
@@ -31,7 +32,6 @@
               lager:Level("WsClient(~s): " ++ Format,
                           [esockd_net:format(State#wsocket_state.peername) | Args])).
 
-
 handle_request(Req) ->
     handle_request(Req:get(method), Req:get(path), Req).
 
@@ -40,7 +40,8 @@ handle_request(Req) ->
 %%--------------------------------------------------------------------
 
 handle_request('GET', "/metrics", Req) ->
-    Req:respond({200, [], <<"Metrics!">>});
+    lager:info(get_metrics()),
+    Req:respond({200, [get_metrics()], <<"Metrics!">>});
 
 handle_request('GET', "/ready", Req) ->
     lager:debug("WebSocket Ready Check from: ~s", [Req:get(peer)]),
