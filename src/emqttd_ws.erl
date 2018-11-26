@@ -21,7 +21,7 @@
 -include("emqttd_protocol.hrl").
 
 -import(proplists, [get_value/3]).
--import(emqt_statsd, [get_metrics/0]).
+-import(emq_statsd, [get_metrics/0]).
 
 -export([handle_request/1, ws_loop/3]).
 
