@@ -40,8 +40,8 @@ handle_request(Req) ->
 %%--------------------------------------------------------------------
 
 handle_request('GET', "/metrics", Req) ->
-    lager:info(get_metrics()),
-    Req:respond({200, [get_metrics()], <<"Metrics!">>});
+    lager:debug("Metrics Pull Request"),
+    Req:respond({200, [{"Content-Type", "text/plain"}], get_metrics()});
 
 handle_request('GET', "/ready", Req) ->
     lager:debug("WebSocket Ready Check from: ~s", [Req:get(peer)]),
