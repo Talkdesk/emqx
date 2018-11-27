@@ -21,6 +21,7 @@
 -include("emqttd_protocol.hrl").
 
 -import(proplists, [get_value/3]).
+-import(emq_statsd, [get_metrics/0]).
 
 -export([handle_request/1, ws_loop/3]).
 
@@ -31,7 +32,6 @@
               lager:Level("WsClient(~s): " ++ Format,
                           [esockd_net:format(State#wsocket_state.peername) | Args])).
 
-
 handle_request(Req) ->
     handle_request(Req:get(method), Req:get(path), Req).
 
@@ -39,13 +39,17 @@ handle_request(Req) ->
 %% MQTT Over WebSocket
 %%--------------------------------------------------------------------
 
+handle_request('GET', "/metrics", Req) ->
+    lager:debug("Metrics Pull Request from: ~s", [Req:get(peer)]),
+    Req:respond({200, [{"Content-Type", "text/plain"}], get_metrics()});
+
 handle_request('GET', "/ready", Req) ->
-		lager:debug("WebSocket Ready Check from: ~s", [Req:get(peer)]),
-		Req:respond({200, [], <<"I'm ready!">>});
+    lager:debug("WebSocket Ready Check from: ~s", [Req:get(peer)]),
+    Req:respond({200, [], <<"I'm ready!">>});
 
 handle_request('GET', "/live", Req) ->
-		lager:debug("WebSocket Live Check from: ~s", [Req:get(peer)]),
-		Req:respond({200, [], <<"I'm alive!">>});
+    lager:debug("WebSocket Live Check from: ~s", [Req:get(peer)]),
+    Req:respond({200, [], <<"I'm alive!">>});
 
 handle_request('GET', "/mqtt", Req) ->
     lager:debug("WebSocket Connection from: ~s", [Req:get(peer)]),
