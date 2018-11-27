@@ -40,7 +40,7 @@ handle_request(Req) ->
 %%--------------------------------------------------------------------
 
 handle_request('GET', "/metrics", Req) ->
-    lager:debug("Metrics Pull Request"),
+    lager:debug("Metrics Pull Request from: ~s", [Req:get(peer)]),
     Req:respond({200, [{"Content-Type", "text/plain"}], get_metrics()});
 
 handle_request('GET', "/ready", Req) ->
