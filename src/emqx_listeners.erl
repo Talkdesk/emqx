@@ -51,7 +51,11 @@ start_listener(Proto, ListenOn, Options) when Proto == ssl; Proto == tls ->
 
 %% Start MQTT/WS listener
 start_listener(Proto, ListenOn, Options) when Proto == http; Proto == ws ->
-    Dispatch = cowboy_router:compile([{'_', [{mqtt_path(Options), emqx_ws_connection, Options}]}]),
+    Dispatch = cowboy_router:compile(
+                 [
+                  {'_', [{mqtt_path(Options), emqx_ws_connection, Options}]},
+                  {'_', [{"/ready", emqx_td_ready_handler, Options}]}
+                 ]),
     start_http_listener(fun cowboy:start_clear/3, 'mqtt:ws', ListenOn, ranch_opts(Options), Dispatch);
 
 %% Start MQTT/WSS listener
