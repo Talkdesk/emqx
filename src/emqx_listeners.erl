@@ -53,10 +53,11 @@ start_listener(Proto, ListenOn, Options) when Proto == ssl; Proto == tls ->
 start_listener(Proto, ListenOn, Options) when Proto == http; Proto == ws ->
     io:format("Listening on /ready for health check"),
     Dispatch = cowboy_router:compile(
-                 [
-                  {'_', [{"/ready", emqx_td_probe_handler, Options}]},
-                  {'_', [{"/live", emqx_td_probe_handler, Options}]},
-                  {'_', [{mqtt_path(Options), emqx_ws_connection, Options}]}
+                 [{'_', [
+                         {"/ready", emqx_td_ready_handler, Options},
+                         {"/live", emqx_td_live_handler, Options},
+                         {mqtt_path(Options), emqx_ws_connection, Options}
+                        ]}
                  ]),
     start_http_listener(fun cowboy:start_clear/3, 'mqtt:ws', ListenOn, ranch_opts(Options), Dispatch);
 
