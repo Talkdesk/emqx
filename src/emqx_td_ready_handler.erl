@@ -3,8 +3,12 @@
 -export([init/2]).
 
 init(Req, State) ->
-    Resp = cowboy_req:reply(200,
+    {Code, Body} = case emqx_signal_handler:rcvd(sigterm) of
+        true -> {502, <<"Terminating.">>};
+        false -> {200, <<"Ready.">>}
+    end,
+    Resp = cowboy_req:reply(Code
                             #{<<"content-type">> => <<"text/plain">>},
-                            <<"Ready.">>,
+                            Body,
                             Req),
     {ok, Resp, State}.
