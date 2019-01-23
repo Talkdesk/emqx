@@ -56,6 +56,7 @@ start_listener(Proto, ListenOn, Options) when Proto == http; Proto == ws ->
                  [{'_', [
                          {"/ready", emqx_td_ready_handler, Options},
                          {"/live", emqx_td_live_handler, Options},
+                         {"/metrics", emqx_td_metrics_handler, Options},
                          {mqtt_path(Options), emqx_ws_connection, Options}
                         ]}
                  ]),
