@@ -22,6 +22,8 @@
 
 -export([load/1, unload/1]).
 
+-export([loaded/1]).
+
 -export([list/0]).
 
 -export([load_expand_plugin/1]).
@@ -40,7 +42,7 @@ init() ->
 init_config(CfgFile) ->
     {ok, [AppsEnv]} = file:consult(CfgFile),
     lists:foreach(fun({AppName, Envs}) ->
-                      [application:set_env(AppName, Par, Val) || {Par, Val} <- Envs]
+                          [application:set_env(AppName, Par, Val) || {Par, Val} <- Envs]
                   end, AppsEnv).
 
 %% @doc Load all plugins when the broker started.
@@ -55,17 +57,21 @@ load() ->
             with_loaded_file(File, fun(Names) -> load_plugins(Names, false) end)
     end.
 
+loaded(Plugin) ->
+    {value, PluginState, _} = lists:keytake(Plugin, 2, ?MODULE:list()),
+    erlang:element(7, PluginState).
+
 load_expand_plugins() ->
     case emqx_config:get_env(expand_plugins_dir) of
         undefined -> ok;
         Dir ->
             PluginsDir = filelib:wildcard("*", Dir),
             lists:foreach(fun(PluginDir) ->
-                case filelib:is_dir(Dir ++ PluginDir) of
-                    true  -> load_expand_plugin(Dir ++ PluginDir);
-                    false -> ok
-                end
-            end, PluginsDir)
+                                  case filelib:is_dir(Dir ++ PluginDir) of
+                                      true  -> load_expand_plugin(Dir ++ PluginDir);
+                                      false -> ok
+                                  end
+                          end, PluginsDir)
     end.
 
 load_expand_plugin(PluginDir) ->
@@ -74,9 +80,9 @@ load_expand_plugin(PluginDir) ->
     code:add_patha(Ebin),
     Modules = filelib:wildcard(Ebin ++ "/*.beam"),
     lists:foreach(fun(Mod) ->
-        Module = list_to_atom(filename:basename(Mod, ".beam")),
-        code:load_file(Module)
-    end, Modules),
+                          Module = list_to_atom(filename:basename(Mod, ".beam")),
+                          code:load_file(Module)
+                  end, Modules),
     case filelib:wildcard(Ebin ++ "/*.app") of
         [App|_] -> application:load(list_to_atom(filename:basename(App, ".app")));
         _ -> emqx_logger:error("App file cannot be found."),
@@ -88,13 +94,13 @@ init_expand_plugin_config(PluginDir) ->
     Etc  = PluginDir ++ "/etc",
     Schema = filelib:wildcard(Priv ++ "/*.schema"),
     Conf = case filelib:wildcard(Etc ++ "/*.conf") of
-        [] -> [];
-        [Conf1] -> cuttlefish_conf:file(Conf1)
-    end,
+               [] -> [];
+               [Conf1] -> cuttlefish_conf:file(Conf1)
+           end,
     AppsEnv = cuttlefish_generator:map(cuttlefish_schema:files(Schema), Conf),
     lists:foreach(fun({AppName, Envs}) ->
-        [application:set_env(AppName, Par, Val) || {Par, Val} <- Envs]
-    end, AppsEnv).
+                          [application:set_env(AppName, Par, Val) || {Par, Val} <- Envs]
+                  end, AppsEnv).
 
 get_expand_plugin_config() ->
     case emqx_config:get_env(expand_plugins_dir) of
@@ -102,17 +108,17 @@ get_expand_plugin_config() ->
         Dir ->
             PluginsDir = filelib:wildcard("*", Dir),
             lists:foldl(fun(PluginDir, Acc) ->
-                case filelib:is_dir(Dir ++ PluginDir) of
-                    true  ->
-                        Etc  = Dir ++ PluginDir ++ "/etc",
-                        case filelib:wildcard("*.{conf,config}", Etc) of
-                            [] -> Acc;
-                            [Conf] -> [Conf | Acc]
-                        end;
-                    false ->
-                        Acc
-                end
-            end, [], PluginsDir)
+                                case filelib:is_dir(Dir ++ PluginDir) of
+                                    true  ->
+                                        Etc  = Dir ++ PluginDir ++ "/etc",
+                                        case filelib:wildcard("*.{conf,config}", Etc) of
+                                            [] -> Acc;
+                                            [Conf] -> [Conf | Acc]
+                                        end;
+                                    false ->
+                                        Acc
+                                end
+                        end, [], PluginsDir)
     end.
 
 ensure_file(File) ->
@@ -161,10 +167,10 @@ list() ->
             Plugins = [plugin(CfgFile) || CfgFile <- CfgFiles],
             StartedApps = names(started_app),
             lists:map(fun(Plugin = #plugin{name = Name}) ->
-                          case lists:member(Name, StartedApps) of
-                              true  -> Plugin#plugin{active = true};
-                              false -> Plugin
-                          end
+                              case lists:member(Name, StartedApps) of
+                                  true  -> Plugin#plugin{active = true};
+                                  false -> Plugin
+                              end
                       end, Plugins)
     end.
 
@@ -323,8 +329,8 @@ write_loaded(AppNames) ->
     case file:open(File, [binary, write]) of
         {ok, Fd} ->
             lists:foreach(fun(Name) ->
-                file:write(Fd, iolist_to_binary(io_lib:format("~s.~n", [Name])))
-            end, AppNames);
+                                  file:write(Fd, iolist_to_binary(io_lib:format("~s.~n", [Name])))
+                          end, AppNames);
         {error, Error} ->
             emqx_logger:error("Open File ~p Error: ~p", [File, Error]),
             {error, Error}
