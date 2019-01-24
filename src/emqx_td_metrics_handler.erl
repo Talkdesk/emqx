@@ -2,21 +2,21 @@
 
 -export([init/2]).
 -import(statsd, [get_metrics/0]).
+-define(METRICS_PLUGIN, statsd).
 
 init(Req, State) ->
-    try get_metrics() of
-        Metrics ->
+    case emqx_plugins:loaded(?METRICS_PLUGIN) of
+        true ->
             Resp = cowboy_req:reply(200,
                                     #{<<"content-type">> => <<"text/plain">>},
-                                    Metrics,
+                                    get_metrics(),
                                     Req),
-            {ok, Resp, State}
-    catch
-        _ ->
-            io:format("Metrics requested but the plugin isn't been loaded yet."),
-            Resp = cowboy_req:reply(502,
+            {ok, Resp, State};
+        false ->
+            Resp = cowboy_req:reply(503,
                                     #{<<"content-type">> => <<"text/plain">>},
-                                    <<"Not ready.">>,
+                                    <<"Not ready yet.">>,
                                     Req),
             {ok, Resp, State}
+
     end.
