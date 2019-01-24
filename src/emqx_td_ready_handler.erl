@@ -5,12 +5,27 @@
 -define(SIGNAL_HANDLER, signal_handler).
 
 init(Req, State) ->
-    {Code, Body} = case ?SIGNAL_HANDLER:rcvd(sigterm) of
-        true -> {502, <<"Terminating.">>};
-        false -> {200, <<"Ready.">>}
-    end,
-    Resp = cowboy_req:reply(Code,
-                            #{<<"content-type">> => <<"text/plain">>},
-                            Body,
-                            Req),
-    {ok, Resp, State}.
+    try ?SIGNAL_HANDLER:rcvd(sigterm) of
+        true ->
+            Resp = cowboy_req:reply(502,
+                                    #{<<"content-type">> => <<"text/plain">>},
+                                    <<"Terminating.">>,
+                                    Req),
+            {ok, Resp, State};
+        false ->
+            Resp = cowboy_req:reply(200,
+                                    #{<<"content-type">> => <<"text/plain">>},
+                                    <<"Ready.">>,
+                                    Req),
+            {ok, Resp, State}
+
+    catch
+        _ ->
+            io:format("Ready endpoint probed but the plugin hasn't been loaded yet."),
+            Resp = cowboy_req:reply(502,
+                                    #{<<"content-type">> => <<"text/plain">>},
+                                    <<"Not ready.">>,
+                                    Req),
+            {ok, Resp, State}
+    end.
+
