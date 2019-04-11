@@ -2,9 +2,10 @@ PROJECT = emqttd
 PROJECT_DESCRIPTION = Erlang MQTT Broker
 PROJECT_VERSION = 2.3.11
 
-DEPS = goldrush gproc lager esockd ekka mochiweb pbkdf2 lager_syslog bcrypt clique jsx
+DEPS = goldrush gproc lager esockd ekka mochiweb pbkdf2 lager_syslog bcrypt clique jsx gen_logger
 
 dep_goldrush     = git https://github.com/basho/goldrush 0.1.9
+dep_gen_logger   = git https://github.com/emqtt/gen_logger master
 dep_gproc        = git https://github.com/uwiger/gproc 0.8.0
 dep_getopt       = git https://github.com/jcomellas/getopt v0.8.2
 dep_lager        = git https://github.com/basho/lager 3.2.4
