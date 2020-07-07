@@ -21,7 +21,7 @@
 -include("emqttd_protocol.hrl").
 
 -import(proplists, [get_value/3]).
--import(emq_statsd, [get_metrics/0]).
+-import(emq_statsd, [get_metrics/0, get_content_type/0]).
 
 -export([handle_request/1, ws_loop/3]).
 
@@ -41,7 +41,7 @@ handle_request(Req) ->
 
 handle_request('GET', "/metrics", Req) ->
     lager:debug("Metrics Pull Request from: ~s", [Req:get(peer)]),
-    Req:respond({200, [{"Content-Type", "text/plain"}], get_metrics()});
+    Req:respond({200, [{"Content-Type", get_content_type()}], get_metrics()});
 
 handle_request('GET', "/ready", Req) ->
     lager:debug("WebSocket Ready Check from: ~s", [Req:get(peer)]),
@@ -129,4 +129,3 @@ ws_loop(Data, State = #wsocket_state{client_pid = ClientPid, parser = Parser}, R
 
 reset_parser(State = #wsocket_state{max_packet_size = PacketSize}) ->
     State#wsocket_state{parser = emqttd_parser:initial_state(PacketSize)}.
-
